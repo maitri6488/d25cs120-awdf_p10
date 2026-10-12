@@ -1,0 +1,94 @@
+{
+  "info": {
+    "_postman_id": "b1c2d3e4-f5a6-4890-abcd-prac10collection",
+    "name": "AWDF Practical 10: Asynchronous Processing (EventEmitter)",
+    "description": "Postman Collection for testing Node.js EventEmitter async background notifications, response-before-handler timestamp ordering, and error listeners.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. POST Create Task (Emits task-created event)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Submit AWDF Practical 10 Journal\",\n  \"description\": \"Demonstrate EventEmitter background notification with 2s delay\",\n  \"priority\": \"high\",\n  \"assignedUser\": \"student@charusat.edu.in\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:5000/tasks",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["tasks"]
+        },
+        "description": "API responds immediately with HTTP 201 and responseSentAt timestamp. The background notification executes asynchronously in the terminal with a 2-second delay."
+      }
+    },
+    {
+      "name": "2. GET All Tasks",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:5000/tasks",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["tasks"]
+        },
+        "description": "Fetch all created tasks."
+      }
+    },
+    {
+      "name": "3. DELETE Task (Emits task-deleted event)",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:5000/tasks/66fa01b123456789abcdef01",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["tasks", "66fa01b123456789abcdef01"]
+        },
+        "description": "Supplementary Problem 1: Deletes task and triggers task-deleted listener."
+      }
+    },
+    {
+      "name": "4. GET Live Event & Timestamp Logs",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:5000/api/events/logs",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api", "events", "logs"]
+        },
+        "description": "Exposes chronological timestamps proving API responded prior to background notification completion."
+      }
+    },
+    {
+      "name": "5. POST Trigger Error Event (Supplementary Problem 2)",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:5000/api/events/trigger-error",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api", "events", "trigger-error"]
+        },
+        "description": "Demonstrates that the dedicated error event listener safely catches errors without crashing the server process."
+      }
+    }
+  ]
+}

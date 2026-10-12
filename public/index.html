@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Practical 10: Asynchronous Processing (EventEmitter)</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <h1>Practical 10: Asynchronous Processing with EventEmitter</h1>
+            <p>Decoupling background notifications from the critical API request path</p>
+        </header>
+
+        <!-- Notification Banner -->
+        <div id="toast" class="toast hidden"></div>
+
+        <div class="grid-layout">
+            <!-- Left Column: Task Creation & Trigger -->
+            <div class="column">
+                <div class="card">
+                    <h2>➕ Create Task & Emit Event</h2>
+                    <p class="card-desc">API responds immediately (201); notification runs asynchronously (+2s delay)</p>
+
+                    <form id="create-task-form">
+                        <div class="form-group">
+                            <label for="task-title">Task Title *</label>
+                            <input type="text" id="task-title" placeholder="e.g. Send lab submission" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="task-user">Assigned User / Email</label>
+                            <input type="text" id="task-user" value="student@charusat.edu.in" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="task-priority">Priority</label>
+                            <select id="task-priority">
+                                <option value="low">Low</option>
+                                <option value="medium" selected>Medium</option>
+                                <option value="high">High</option>
+                            </select>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary" style="width: 100%;">Create Task (POST /tasks)</button>
+                    </form>
+                </div>
+
+                <div class="card">
+                    <h2>Existing Tasks</h2>
+                    <p class="card-desc">Clicking "Delete" triggers the <code>task-deleted</code> event</p>
+                    <ul id="tasks-list" class="tasks-list"></ul>
+                </div>
+            </div>
+
+            <!-- Right Column: Timestamp & Event Loop Proof -->
+            <div class="column">
+                <div class="card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <h2>⏱️ Live Timestamp Stream</h2>
+                        <div style="display: flex; gap: 6px;">
+                            <button id="btn-trigger-error" class="btn btn-sm btn-danger">Emit Error Event</button>
+                            <button id="btn-clear-logs" class="btn btn-sm btn-secondary">Clear</button>
+                        </div>
+                    </div>
+                    <p class="card-desc">
+                        Demonstrates that <strong>[API Response]</strong> timestamp occurs <strong>before</strong> the <strong>[Background Listener]</strong> completes!
+                    </p>
+
+                    <div id="logs-container" class="logs-container">
+                        <p style="text-align: center; color: #888; padding: 20px;">
+                            No event logs yet. Create a task to observe timestamps.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>🧠 How It Works (Event Loop)</h2>
+                    <ol style="font-size: 0.85rem; padding-left: 20px; color: #4a5568;">
+                        <li><strong>Step 1:</strong> Client sends <code>POST /tasks</code>.</li>
+                        <li><strong>Step 2:</strong> Server saves task and sends HTTP <code>201</code> response <strong>immediately</strong>.</li>
+                        <li><strong>Step 3:</strong> Server calls <code>taskEvents.emit('task-created', task)</code>.</li>
+                        <li><strong>Step 4:</strong> Background listener handles email notification with a 2-second simulated delay <strong>without blocking the client response</strong>!</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>AWDF Practical 10 &bull; Maitri Sheta (D25CS120) &bull; CSE, CSPIT &bull; Charotar University of Science and Technology</p>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
