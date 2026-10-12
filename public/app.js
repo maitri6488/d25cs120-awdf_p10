@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
     createTaskForm.addEventListener('submit', handleCreateTask);
     btnTriggerError.addEventListener('click', handleTriggerError);
     btnClearLogs.addEventListener('click', handleClearLogs);
+    tasksList.addEventListener('click', handleTaskListClick);
 
     // Refresh logs every 1.5 seconds to capture async completions
     setInterval(fetchLogs, 1500);
@@ -52,9 +53,19 @@ function renderTasks(tasks) {
                     Assigned: ${escapeHtml(t.assignedUser || 'student@charusat.edu.in')} &bull; ${t.priority || 'medium'}
                 </div>
             </div>
-            <button class="btn btn-sm btn-danger" onclick="deleteTask('${t._id}')">Delete</button>
+            <button type="button" class="btn btn-sm btn-danger btn-delete" data-id="${t._id}" onclick="deleteTask('${t._id}', this)">Delete</button>
         </li>
     `).join('');
+}
+
+// Event Delegation for Task Deletion
+async function handleTaskListClick(e) {
+    const btn = e.target.closest('.btn-delete');
+    if (!btn) return;
+    const id = btn.getAttribute('data-id');
+    if (id) {
+        await deleteTask(id, btn);
+    }
 }
 
 // Create Task
@@ -89,20 +100,36 @@ async function handleCreateTask(e) {
 }
 
 // Delete Task (Emits task-deleted event)
-async function deleteTask(id) {
-    if (!confirm('Delete task and emit task-deleted event?')) return;
+async function deleteTask(id, btnElement) {
+    if (btnElement) {
+        btnElement.disabled = true;
+        btnElement.textContent = 'Deleting...';
+    }
     try {
         const res = await fetch(`/tasks/${id}`, { method: 'DELETE' });
         const data = await res.json();
         if (data.success) {
-            showToast('Task deleted! task-deleted event emitted.', 'info');
+            showToast('Task deleted successfully! (task-deleted event emitted)', 'info');
             fetchTasks();
             fetchLogs();
+        } else {
+            showToast(data.message || 'Error deleting task', 'error');
+            if (btnElement) {
+                btnElement.disabled = false;
+                btnElement.textContent = 'Delete';
+            }
         }
     } catch (err) {
         showToast('Error: ' + err.message, 'error');
+        if (btnElement) {
+            btnElement.disabled = false;
+            btnElement.textContent = 'Delete';
+        }
     }
 }
+
+// Attach globally for inline onclick fallback
+window.deleteTask = deleteTask;
 
 // Trigger Deliberate Error Event (Supplementary Problem 2)
 async function handleTriggerError() {

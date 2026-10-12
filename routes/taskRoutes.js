@@ -94,7 +94,7 @@ router.post('/', async (req, res, next) => {
 router.delete('/:id', async (req, res, next) => {
     try {
         let deletedTask;
-        if (mongoose.connection.readyState === 1) {
+        if (mongoose.connection.readyState === 1 && mongoose.isValidObjectId(req.params.id)) {
             deletedTask = await Task.findByIdAndDelete(req.params.id);
         } else {
             const index = fallbackTasks.findIndex(t => t._id.toString() === req.params.id);
